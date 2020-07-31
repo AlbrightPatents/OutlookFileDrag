@@ -9,6 +9,7 @@ namespace OutlookFileDrag
         private static ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private System.Threading.Timer cleanupTimer;
         private DragDropHook hook;
+        private RegisterDragDropHook registerHook;
 
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
@@ -37,12 +38,16 @@ namespace OutlookFileDrag
                 //Start hook;
                 hook = new DragDropHook();
                 hook.Start();
+                registerHook = new RegisterDragDropHook();
+                registerHook.Start();
             }
             catch (Exception ex)
             {
                 log.Fatal("Fatal error", ex);
                 if (hook != null)
                     hook.Stop();
+                if (registerHook != null)
+                    registerHook.Stop();
             }
         }
 
@@ -75,15 +80,24 @@ namespace OutlookFileDrag
             // Note: Outlook no longer raises this event. If you have code that 
             //    must run when Outlook shuts down, see http://go.microsoft.com/fwlink/?LinkId=506785
 
+            log.Info("Add-in shutdown");
             try
             {
-                log.Info("Add-in shutdown");
                 if (hook != null)
                     hook.Stop();
             }
             catch (Exception ex)
             {
-                log.Fatal("Fatal error", ex);
+                log.Fatal("Fatal error stopping DoDrapDropHook", ex);
+            }
+            try
+            {
+                if (registerHook != null)
+                    registerHook.Stop();
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Fatal error stopping RegisterDragDropHook", ex);
             }
         }
 

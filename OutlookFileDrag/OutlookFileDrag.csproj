@@ -139,6 +139,9 @@
       <HintPath>..\packages\log4net.2.0.8\lib\net40-full\log4net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Mono.HttpUtility, Version=1.0.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.HttpUtility.1.0.0.1\lib\net40\Mono.HttpUtility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.configuration" />
@@ -193,6 +196,9 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="DropTargetAdapter.cs" />
+    <Compile Include="OutlookDataObjectBase.cs" />
+    <Compile Include="RegisterDragDropHook.cs" />
     <Compile Include="DragDropHook.cs" />
     <Compile Include="DataObjectHelper.cs" />
     <Compile Include="FileUtility.cs" />
@@ -236,8 +242,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>OutlookFileDrag.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>6EA39ECAD013020F956462F4CBF07570C217A1CF</ManifestCertificateThumbprint>

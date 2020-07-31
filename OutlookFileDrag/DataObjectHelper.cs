@@ -33,7 +33,88 @@ namespace OutlookFileDrag
             return data.QueryGetData(format) == NativeMethods.S_OK;
         }
 
-        internal static void SetDropFiles(ref STGMEDIUM medium, string[] filenames)
+        public static void SetBytes(ref STGMEDIUM medium, byte[] bytes)
+        {
+            //Allocate global memory and get pointer
+            IntPtr ptrData = Marshal.AllocHGlobal(bytes.Length);
+
+            //Copy filenames to memory after DROPFILES structure
+            Marshal.Copy(bytes, 0, ptrData, bytes.Length);
+
+            //Load structure into medium
+            medium.unionmember = ptrData;
+            medium.tymed = TYMED.TYMED_HGLOBAL;
+            medium.pUnkForRelease = IntPtr.Zero;        //HGLOBAL to be released by caller
+        }
+
+        public static void SetUnidocde(ref STGMEDIUM medium, string text)
+        {
+            //Get null-terminated text
+            string termintatedText = text +"\0";
+            byte[] bytes = System.Text.Encoding.Unicode.GetBytes(termintatedText);
+            SetBytes(ref medium, bytes);
+        }
+        
+        public static void SetFileGroupDescriptorW(ref STGMEDIUM medium, string[] filenames)
+        {
+            NativeMethods.FILEGROUPDESCRIPTORW gdesc = new NativeMethods.FILEGROUPDESCRIPTORW();
+            NativeMethods.FILEDESCRIPTORW desc = new NativeMethods.FILEDESCRIPTORW();
+            int dataLength = (Marshal.SizeOf(desc) * filenames.Length) + Marshal.SizeOf(gdesc);
+            IntPtr ptr = Marshal.AllocHGlobal(dataLength);
+            gdesc.cItems = (uint)filenames.Length;
+            Marshal.StructureToPtr(gdesc, ptr, true);
+            IntPtr p = IntPtr.Add(ptr, Marshal.SizeOf(gdesc));
+            for (uint i = 0; i < filenames.Length; ++i)
+            {
+                desc.cFileName = filenames[i];
+                Marshal.StructureToPtr(desc, p, true);
+                p = IntPtr.Add(p, Marshal.SizeOf(desc));
+            }
+            //Load structure into medium
+            medium.unionmember = ptr;
+            medium.tymed = TYMED.TYMED_HGLOBAL;
+            medium.pUnkForRelease = IntPtr.Zero;        //HGLOBAL to be released by caller
+        }
+
+        public static void SetFileGroupDescriptor(ref STGMEDIUM medium, string[] filenames)
+        {
+            NativeMethods.FILEGROUPDESCRIPTORA gdesc = new NativeMethods.FILEGROUPDESCRIPTORA();
+            NativeMethods.FILEDESCRIPTORA desc = new NativeMethods.FILEDESCRIPTORA();
+            int dataLength = (Marshal.SizeOf(new NativeMethods.FILEDESCRIPTORW()) * filenames.Length) + Marshal.SizeOf(gdesc);
+            IntPtr ptr = Marshal.AllocHGlobal(dataLength);
+            gdesc.cItems = (uint)filenames.Length;
+            Marshal.StructureToPtr(gdesc, ptr, true);
+            IntPtr p = IntPtr.Add(ptr, Marshal.SizeOf(gdesc));
+            for (uint i = 0; i < filenames.Length; ++i)
+            {
+                desc.cFileName = filenames[i];
+                Marshal.StructureToPtr(desc, p, true);
+                p = IntPtr.Add(p, Marshal.SizeOf(desc));
+            }
+            //Load structure into medium
+            medium.unionmember = ptr;
+            medium.tymed = TYMED.TYMED_HGLOBAL;
+            medium.pUnkForRelease = IntPtr.Zero;        //HGLOBAL to be released by caller
+        }
+
+        public static void SetFileContents(ref STGMEDIUM medium, string filename)
+        {
+            IStream iStream = null;
+            log.InfoFormat("Creating stream on file {0}", filename);
+            int result = NativeMethods.SHCreateStreamOnFileEx(filename, 0, 0, false, null, ref iStream);
+            log.InfoFormat("Stream created with result {0}", result);
+            log.InfoFormat("Stream still null? {0}", iStream == null);
+            IntPtr ptr = Marshal.GetIUnknownForObject(iStream);
+            log.InfoFormat("Stream ptr {0}", ptr.ToInt64());
+
+
+            //Load structure into medium
+            medium.unionmember = ptr;
+            medium.tymed = TYMED.TYMED_ISTREAM;
+            medium.pUnkForRelease = IntPtr.Zero;        //HGLOBAL to be released by caller
+        }
+
+        public static void SetDropFiles(ref STGMEDIUM medium, string[] filenames)
         {
             //Create DROPFILES structure
             NativeMethods.DROPFILES dropFiles = new NativeMethods.DROPFILES();
@@ -73,6 +154,76 @@ namespace OutlookFileDrag
                 filenames = GetFilenamesAnsi(data);
 
             return filenames;
+        }
+
+
+        public static byte[] GetContentBytes(NativeMethods.IDataObject data, String formatName, int index)
+        {
+            log.Info("Getting " + formatName);
+            IntPtr ptrFgd = IntPtr.Zero;
+            STGMEDIUM medium = new STGMEDIUM();
+
+            //Define FileGroupDescriptor format
+            FORMATETC format = new FORMATETC();
+            format.cfFormat = (short)GetClipboardFormat(formatName);
+            format.dwAspect = DVASPECT.DVASPECT_CONTENT;
+            format.lindex = index;
+            format.ptd = IntPtr.Zero;
+            format.tymed = TYMED.TYMED_ISTREAM | TYMED.TYMED_ISTORAGE | TYMED.TYMED_HGLOBAL;
+
+            //Query if format exists in data
+            if (data.QueryGetData(format) != NativeMethods.S_OK)
+            {
+                log.Info("No " + formatName + " found");
+                return null;
+            }
+
+            //Get data into medium
+            int retVal = data.GetData(format, out medium);
+            if (retVal != NativeMethods.S_OK)
+                throw new Exception(string.Format("Could not get FileGroupDescriptor format.  Error returned: {0}", retVal));
+
+            //Read medium into byte array
+            log.InfoFormat("Reading structure into memory stream");
+            byte[] bytes;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                DataObjectHelper.ReadMediumIntoStream(medium, stream);
+                log.InfoFormat("memory stream lenght {0}", stream.Length);
+                bytes = new byte[stream.Length];
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.Read(bytes, 0, bytes.Length);
+            }
+
+            return bytes;
+        }
+
+        public static string GetContentUnicode(NativeMethods.IDataObject data, String formatName, int index = -1)
+        {
+            byte[] bytes = GetContentBytes(data, formatName, index);
+            if (bytes == null) return null;
+            return System.Text.Encoding.Unicode.GetString(bytes, 0, bytes.Length - 2);
+        }
+
+        public static string GetContentUTF8(NativeMethods.IDataObject data, String formatName, int index = -1)
+        {
+            byte[] bytes = GetContentBytes(data, formatName, index);
+            if (bytes == null) return null;
+            return System.Text.Encoding.UTF8.GetString(bytes, 0, bytes.Length - 1);
+        }
+
+        public static string GetContentAnsi(NativeMethods.IDataObject data, String formatName, int index = -1)
+        {
+            byte[] bytes = GetContentBytes(data, formatName, index);
+            if (bytes == null) return null;
+            return System.Text.Encoding.ASCII.GetString(bytes, 0, bytes.Length - 1);
+        }
+
+        public static string GetContentHex(NativeMethods.IDataObject data, String formatName, int index = -1)
+        {
+            byte[] bytes = GetContentBytes(data, formatName, index);
+            if (bytes == null) return null;
+            return string.Concat(Array.ConvertAll(bytes, b => b.ToString("X2")));
         }
 
         internal static string[] GetFilenamesAnsi(NativeMethods.IDataObject data)
@@ -148,7 +299,6 @@ namespace OutlookFileDrag
                 log.DebugFormat("Filenames found: {0}", string.Join(", ", filenames));
 
                 return filenames;
-
             }
             finally
             {
@@ -157,6 +307,57 @@ namespace OutlookFileDrag
                 if (medium.pUnkForRelease == null)
                     NativeMethods.ReleaseStgMedium(ref medium);
             }
+        }
+
+        public static string[] GetFilenamesUnicode(STGMEDIUM medium)
+        {
+            log.Debug("Getting filenames (Unicode)");
+            IntPtr ptrFgd = IntPtr.Zero;
+
+            //Read medium into byte array
+            log.Debug("Reading structure into memory stream");
+            byte[] bytes;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                DataObjectHelper.ReadMediumIntoStream(medium, stream);
+                bytes = new byte[stream.Length];
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.Read(bytes, 0, bytes.Length);
+            }
+
+            //Copy byte array into unmanaged memory
+            log.Debug("Copying structure into unmanaged memory");
+            ptrFgd = Marshal.AllocHGlobal(bytes.Length);
+            Marshal.Copy(bytes, 0, ptrFgd, bytes.Length);
+
+            //Marshal unmanaged memory to a FILEGROUPDESCRIPTORW struct
+            log.Debug("Marshaling unmanaged memory into FILEGROUPDESCRIPTORW struct");
+            NativeMethods.FILEGROUPDESCRIPTORW fgd = (NativeMethods.FILEGROUPDESCRIPTORW)Marshal.PtrToStructure(ptrFgd, typeof(NativeMethods.FILEGROUPDESCRIPTORW));
+            log.Debug(string.Format("Files found: {0}", fgd.cItems));
+
+            //Create an array to store file names
+            string[] filenames = new string[fgd.cItems];
+
+            //Get the pointer to the first file descriptor
+            IntPtr ptrFd = IntPtr.Add(ptrFgd, sizeof(uint));
+
+            //Loop for the number of files acording to the file group descriptor
+            for (int fdIndex = 0; fdIndex < fgd.cItems; fdIndex++)
+            {
+                log.DebugFormat("Getting filename {0}", fdIndex);
+
+                //Marshal pointer to a FILEDESCRIPTORW struct
+                NativeMethods.FILEDESCRIPTORW fd = (NativeMethods.FILEDESCRIPTORW)Marshal.PtrToStructure(ptrFd, typeof(NativeMethods.FILEDESCRIPTORW));
+
+                //Get filename of file descriptor and put in array
+                filenames[fdIndex] = fd.cFileName;
+
+                //Move the file descriptor pointer to the next file descriptor
+                ptrFd = IntPtr.Add(ptrFd, Marshal.SizeOf(fd));
+            }
+
+            log.DebugFormat("Filenames found: {0}", string.Join(", ", filenames));
+            return filenames;
         }
 
         internal static string[] GetFilenamesUnicode(NativeMethods.IDataObject data)
@@ -186,51 +387,7 @@ namespace OutlookFileDrag
                 if (retVal != NativeMethods.S_OK)
                     throw new Exception(string.Format("Could not get FileGroupDescriptorW format.  Error returned: {0}", retVal));
 
-                //Read medium into byte array
-                log.Debug("Reading structure into memory stream");
-                byte[] bytes;
-                using (MemoryStream stream = new MemoryStream())
-                {
-                    DataObjectHelper.ReadMediumIntoStream(medium, stream);
-                    bytes = new byte[stream.Length];
-                    stream.Seek(0, SeekOrigin.Begin);
-                    stream.Read(bytes, 0, bytes.Length);
-                }
-                
-                //Copy byte array into unmanaged memory
-                log.Debug("Copying structure into unmanaged memory");
-                ptrFgd = Marshal.AllocHGlobal(bytes.Length);
-                Marshal.Copy(bytes, 0, ptrFgd, bytes.Length);
-
-                //Marshal unmanaged memory to a FILEGROUPDESCRIPTORW struct
-                log.Debug("Marshaling unmanaged memory into FILEGROUPDESCRIPTORW struct");
-                NativeMethods.FILEGROUPDESCRIPTORW fgd = (NativeMethods.FILEGROUPDESCRIPTORW)Marshal.PtrToStructure(ptrFgd, typeof(NativeMethods.FILEGROUPDESCRIPTORW));
-                log.Debug(string.Format("Files found: {0}", fgd.cItems));
-
-                //Create an array to store file names
-                string[] filenames = new string[fgd.cItems];
-
-                //Get the pointer to the first file descriptor
-                IntPtr ptrFd = IntPtr.Add(ptrFgd, sizeof(uint));
-
-                //Loop for the number of files acording to the file group descriptor
-                for (int fdIndex = 0; fdIndex < fgd.cItems; fdIndex++)
-                {
-                    log.DebugFormat("Getting filename {0}", fdIndex);
-
-                    //Marshal pointer to a FILEDESCRIPTORW struct
-                    NativeMethods.FILEDESCRIPTORW fd = (NativeMethods.FILEDESCRIPTORW)Marshal.PtrToStructure(ptrFd, typeof(NativeMethods.FILEDESCRIPTORW));
-
-                    //Get filename of file descriptor and put in array
-                    filenames[fdIndex] = fd.cFileName;
-
-                    //Move the file descriptor pointer to the next file descriptor
-                    ptrFd = IntPtr.Add(ptrFd, Marshal.SizeOf(fd));
-                }
-
-                log.DebugFormat("Filenames found: {0}", string.Join(", ", filenames));
-                return filenames;
-
+                return GetFilenamesUnicode(medium);
             }
             finally
             {
