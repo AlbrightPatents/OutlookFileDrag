@@ -44,7 +44,6 @@ namespace OutlookFileDrag
 
                 log.Info("Starting RegisterDragDrop hook");
                 //Hook current (UI) thread
-                // TODO the following line prevents outlook from starting
                 hook.ThreadACL.SetInclusiveACL(new Int32[] { 0 });
                 isHooked = true;
             }
