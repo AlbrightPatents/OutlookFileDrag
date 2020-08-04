@@ -197,21 +197,21 @@ namespace OutlookFileDrag
             {
                 //Get data into passed medium
                 log.InfoFormat("IDataObject.GetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
-                log.InfoFormat("IDataObject.GetData Format name: {0}", System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name);
-
-                if (format.cfFormat == NativeMethods.CF_FILEGROUPDESCRIPTORW)
+                string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name;
+                log.InfoFormat("IDataObject.GetData Format name: {0}", formatName);
+                if (formatName == "FileGroupDescriptorW")
                 {
                     medium = new STGMEDIUM();
                     DataObjectHelper.SetFileGroupDescriptorW(ref medium, UrlsToFilenames(urls));
                     return NativeMethods.S_OK;
                 }
-                else if (format.cfFormat == NativeMethods.CF_FILEGROUPDESCRIPTORA)
+                else if (formatName == "FileGroupDescriptor")
                 {
                     medium = new STGMEDIUM();
                     DataObjectHelper.SetFileGroupDescriptor(ref medium, UrlsToFilenames(urls));
                     return NativeMethods.S_OK;
                 }
-                else if (format.cfFormat == NativeMethods.CF_FILECONTENTS)
+                else if (formatName == "FileContents")
                 {
                     medium = new STGMEDIUM();
                     int index = format.lindex;
@@ -250,14 +250,15 @@ namespace OutlookFileDrag
             try
             {
                 log.InfoFormat("IDataObject.QueryGetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
-                log.InfoFormat("IDataObject.QueryGetData Format name: {0}", System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name);
+                string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name;
+                log.InfoFormat("IDataObject.QueryGetData Format name: {0}", formatName);
 
                 int r;
-                switch(format.cfFormat)
+                switch(formatName)
                 {
-                    case NativeMethods.CF_FILECONTENTS:
-                    case NativeMethods.CF_FILEGROUPDESCRIPTORA:
-                    case NativeMethods.CF_FILEGROUPDESCRIPTORW:
+                    case "FileContents":
+                    case "FileGroupDescriptor":
+                    case "FileGroupDescriptorW":
                         r = NativeMethods.S_OK;
                         break;
                     default:

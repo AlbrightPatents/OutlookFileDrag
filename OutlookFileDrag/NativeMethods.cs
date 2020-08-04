@@ -14,9 +14,6 @@ namespace OutlookFileDrag
         public const short CF_TEXT = 1;
         public const short CF_UNICODETEXT = 13;
         public const short CF_HDROP = 15;
-        public const short CF_FILECONTENTS = -16281;         // FileContents
-        public const short CF_FILEGROUPDESCRIPTORW = -16089; // FileGroupDescriptorW
-        public const short CF_FILEGROUPDESCRIPTORA = -16090; // FileGroupDescriptor
         public const short CF_LINK = -15683;                 // Link
 
         public const int DATA_S_SAMEFORMATETC = 0x00040130;

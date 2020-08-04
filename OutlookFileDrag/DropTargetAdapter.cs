@@ -66,6 +66,10 @@ namespace OutlookFileDrag
             }
 
             string url = DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocatorW");
+            if (!(url is null) && url.StartsWith("about:"))
+            {
+                url = DataObjectHelper.GetContentUnicode(pDataObj, "UnicodeText");
+            }
             if (url is null)
             {
                 log.Info("No UniformResourceLocatorW found");
@@ -80,7 +84,7 @@ namespace OutlookFileDrag
             log.InfoFormat("HTML format: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "HTML Format"));
             log.InfoFormat("Object Descriptor: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "Object Descriptor"));
             log.InfoFormat("FileName: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileName", 0));
-            log.InfoFormat("FileContents: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileContents", 0));
+     //       log.InfoFormat("FileContents: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileContents", 0));
             log.InfoFormat("Link: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "Link", 0));
 
 
