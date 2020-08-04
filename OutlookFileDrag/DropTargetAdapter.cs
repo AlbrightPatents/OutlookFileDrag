@@ -44,8 +44,7 @@ namespace OutlookFileDrag
             return _delegate.OleDrop(Wrap(pDataObj), grfKeyState, pt, ref pdwEffect);
         }
 
-        [return: MarshalAs(UnmanagedType.Interface)]
-        internal NativeMethods.IDataObject Wrap([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj)
+        internal void LogFormats([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj)
         {
             int r = pDataObj.EnumFormatEtc(DATADIR.DATADIR_GET, out IEnumFORMATETC f);
             if (r != NativeMethods.S_OK)
@@ -64,18 +63,10 @@ namespace OutlookFileDrag
                     log.InfoFormat("Format name {0}", z.Name);
                 }
             }
+        }
 
-            string url = DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocatorW");
-            if (!(url is null) && url.StartsWith("about:"))
-            {
-                url = DataObjectHelper.GetContentUnicode(pDataObj, "UnicodeText");
-            }
-            if (url is null)
-            {
-                log.Info("No UniformResourceLocatorW found");
-
-                // TODO Check for ANSI URL
-            }
+        internal void LogCommonFields([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj)
+        {
             log.InfoFormat("UnicodeText: {0}", DataObjectHelper.GetContentUnicode(pDataObj, "UnicodeText"));
             log.InfoFormat("Text: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "Text"));
             log.InfoFormat("UniformResourceLocatorW: {0}", DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocatorW"));
@@ -84,23 +75,42 @@ namespace OutlookFileDrag
             log.InfoFormat("HTML format: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "HTML Format"));
             log.InfoFormat("Object Descriptor: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "Object Descriptor"));
             log.InfoFormat("FileName: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileName", 0));
-     //       log.InfoFormat("FileContents: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileContents", 0));
+            //       log.InfoFormat("FileContents: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "FileContents", 0));
             log.InfoFormat("Link: {0}", DataObjectHelper.GetContentAnsi(pDataObj, "Link", 0));
+        }
 
-
-            log.Info("==============");
+        [return: MarshalAs(UnmanagedType.Interface)]
+        internal NativeMethods.IDataObject Wrap([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj)
+        {
+            string url = DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocatorW");
 
             if (url is null)
             {
+                log.Info("No UniformResourceLocatorW found");
+                // Check for ANSI URL
+                url = DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocator");
+            }
+
+            if (url is null)
+            {
+                log.Info("No UniformResourceLocator found");
+            }
+             
+            if (!(url is null) && url.StartsWith("about:"))
+            {
+                url = DataObjectHelper.GetContentUnicode(pDataObj, "UnicodeText");
+            }
+
+            if (url is null)
+            {
+                // If no URL has been located just do whatever the original request was
                 return pDataObj;
             }
             else
             {
                 // TODO Check the URL is a case records document
+                // TODO Perhaps we want a set of allowed URLs.
 
-
-                // return new OutlookDataObjectBase(pDataObj, new string[] { "\\\\AP-WIN.ap.local\\Apshared\\IT\\temp\\2.pdf" });
-                //return new OutlookDataObjectBase(pDataObj, new string[] { "C:\\Users\\PhilScull\\Desktop\\cnipa.html" });
                 return new OutlookDataObjectBase(pDataObj, new string[] { url });
             }
         }

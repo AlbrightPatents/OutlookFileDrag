@@ -7,7 +7,7 @@ using log4net;
 
 namespace OutlookFileDrag
 {
-    //Class that wraps Outlook data object and adds support for CF_HDROP format
+    // Class that wraps a drop data object converts URLs to file contents
     class OutlookDataObjectBase : NativeMethods.IDataObject, ICustomQueryInterface  
     {
         // TODO - Do we need this here any more?
@@ -25,8 +25,6 @@ namespace OutlookFileDrag
             this.urls = urls;
         }
 
-
-
         public static string UrlToFilePath(string url)
         {
             Uri uri = UrlToUri(url);
@@ -37,10 +35,8 @@ namespace OutlookFileDrag
         {
             string query = uri.Query;
             log.InfoFormat("query of {0} is {1}", uri, query);
-
             string path = uri.LocalPath;
             log.InfoFormat("Read path from URI {0}", path);
-
             return path.Substring(0, path.Length - query.Length); ;
         }
 
@@ -87,7 +83,7 @@ namespace OutlookFileDrag
             return filenames;
         }
 
-        // TODO this needs updating!
+        // TODO Not actually called by outlook. Needs testing.
         public int EnumFormatEtc(DATADIR direction, out IEnumFORMATETC ppenumFormatEtc)
         {
             IEnumFORMATETC origEnum = null;
@@ -97,37 +93,38 @@ namespace OutlookFileDrag
                 switch (direction)
                 {
                     case DATADIR.DATADIR_GET:
-                        //Get original enumerator
-                        int result = innerData.EnumFormatEtc(direction, out origEnum);
-                        if (result != NativeMethods.S_OK)
-                        {
-                            ppenumFormatEtc = null;
-                            return result;
-                        }
-
-                        //Enumerate original formats
+                        // Enumerate formats
                         List<FORMATETC> formats = new List<FORMATETC>();
-                        FORMATETC[] buffer = new FORMATETC[] { new FORMATETC() };
-                        
-                        while (origEnum.Next(1, buffer, null) == NativeMethods.S_OK)
+                                               
+                        // FileContents
+                        formats.Add(new FORMATETC
                         {
-                            //Convert format from short to unsigned short
-                            ushort cfFormat = (ushort) buffer[0].cfFormat;
+                            cfFormat = (short)System.Windows.Forms.DataFormats.GetFormat("FileContents").Id,
+                            dwAspect = DVASPECT.DVASPECT_CONTENT,
+                            lindex = -1,
+                            ptd = IntPtr.Zero,
+                            tymed = TYMED.TYMED_HGLOBAL
+                        });
 
-                            //Do not return text formats -- some applications try to get text before files
-                            if (cfFormat != NativeMethods.CF_TEXT && cfFormat != NativeMethods.CF_UNICODETEXT && cfFormat != (ushort)DataObjectHelper.GetClipboardFormat("Csv"))
-                                formats.Add(buffer[0]);
-                        }
-                        
+                        // FileGroupDescriptorW
+                        formats.Add(new FORMATETC
+                        {
+                            cfFormat = (short)System.Windows.Forms.DataFormats.GetFormat("FileGroupDescriptorW").Id,
+                            dwAspect = DVASPECT.DVASPECT_CONTENT,
+                            lindex = -1,
+                            ptd = IntPtr.Zero,
+                            tymed = TYMED.TYMED_HGLOBAL
+                        });
 
-                        //Add CF_HDROP format
-                        FORMATETC format = new FORMATETC();
-                        format.cfFormat = NativeMethods.CF_HDROP;
-                        format.dwAspect = DVASPECT.DVASPECT_CONTENT;
-                        format.lindex = -1;
-                        format.ptd = IntPtr.Zero;
-                        format.tymed = TYMED.TYMED_HGLOBAL;
-                        formats.Add(format);
+                        // FileGroupDescriptor
+                        formats.Add(new FORMATETC
+                        {
+                            cfFormat = (short)System.Windows.Forms.DataFormats.GetFormat("FileGroupDescriptor").Id,
+                            dwAspect = DVASPECT.DVASPECT_CONTENT,
+                            lindex = -1,
+                            ptd = IntPtr.Zero,
+                            tymed = TYMED.TYMED_HGLOBAL
+                        });
 
                         //Return new enumerator for available formats
                         ppenumFormatEtc = new FormatEtcEnumerator(formats.ToArray());
@@ -135,13 +132,14 @@ namespace OutlookFileDrag
 
                     case DATADIR.DATADIR_SET:
                         //Return original enumerator
+                        // TODO This should probably just return an error code
                         return innerData.EnumFormatEtc(direction, out ppenumFormatEtc);
+
                     default:
                         //Invalid direction
                         ppenumFormatEtc = null;
                         return NativeMethods.E_INVALIDARG;
                 }
-
             }
             catch (Exception ex)
             {
@@ -151,36 +149,39 @@ namespace OutlookFileDrag
             }
             finally
             {
-                //Release all unmanaged objects
+                // Release all unmanaged objects
                 if (origEnum != null)
                     Marshal.ReleaseComObject(origEnum);
             }
         }
 
-
-        // TODO this needs updating
+        // TODO Not actually called by outlook. Needs testing.
         public int GetCanonicalFormatEtc(ref FORMATETC formatIn, out FORMATETC formatOut)
         {
             try
             {
                 log.InfoFormat("IDataObject.GetCanonicalFormatEtc called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", formatIn.cfFormat, formatIn.dwAspect, formatIn.lindex, formatIn.ptd, formatIn.tymed);
-                if (formatIn.cfFormat == NativeMethods.CF_HDROP)
-                {
-                    //Copy input format to output format
-                    formatOut = new FORMATETC();
-                    formatOut.cfFormat = formatIn.cfFormat;
-                    formatOut.dwAspect = formatIn.dwAspect;
-                    formatOut.lindex = formatIn.lindex;
-                    formatOut.ptd = IntPtr.Zero;
-                    formatOut.tymed = formatIn.tymed;
-                    
-                    return NativeMethods.DATA_S_SAMEFORMATETC;
-                }
-                else
-                {
-//                    formatOut = new FORMATETC();
-//                    return NativeMethods.E_UNEXPECTED;
-                    return innerData.GetCanonicalFormatEtc(formatIn, out formatOut);
+                string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)formatIn.cfFormat).Name;
+                log.InfoFormat("IDataObject.GetCanonicalFormatEtc Format name: {0}", formatName);
+
+                switch(formatName) {
+                    case "FileContents":
+                    case "FileGroupDescriptor":
+                    case "FileGroupDescriptorW":
+                        // Copy input format to output format
+                        formatOut = new FORMATETC
+                        {
+                            cfFormat = formatIn.cfFormat,
+                            dwAspect = formatIn.dwAspect,
+                            lindex = formatIn.lindex,
+                            ptd = IntPtr.Zero,
+                            tymed = formatIn.tymed
+                        };
+
+                        return NativeMethods.DATA_S_SAMEFORMATETC;
+                    default:
+                        formatOut = new FORMATETC();
+                        return NativeMethods.E_UNEXPECTED;
                 }
             }
             catch (Exception ex)
@@ -195,10 +196,11 @@ namespace OutlookFileDrag
         {
             try
             {
-                //Get data into passed medium
+                // Get data into passed medium
                 log.InfoFormat("IDataObject.GetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
                 string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name;
                 log.InfoFormat("IDataObject.GetData Format name: {0}", formatName);
+
                 if (formatName == "FileGroupDescriptorW")
                 {
                     medium = new STGMEDIUM();
@@ -216,11 +218,13 @@ namespace OutlookFileDrag
                     medium = new STGMEDIUM();
                     int index = format.lindex;
                     if (index >=0 && index < urls.Length) {
+                        // TODO Currently this only works with locally accessible file: URLs
+                        // TODO Add support for HTTP/HTTPS fetches
                         DataObjectHelper.SetFileContents(ref medium, UrlToFilePath(urls[index]));
                     }
                     else
                     {
-                        // TODO ???
+                        return NativeMethods.DV_E_LINDEX;
                     }
                     return NativeMethods.S_OK;
                 }
@@ -342,14 +346,12 @@ namespace OutlookFileDrag
                         return CustomQueryInterfaceResult.Failed;
                     }
                 }
-
             }
             catch (Exception ex)
             {
                 log.Error("Exception in ICustomQueryInterface", ex);
                 return CustomQueryInterfaceResult.Failed;
             }
-
         }
     }
 }
