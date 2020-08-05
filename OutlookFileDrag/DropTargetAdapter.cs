@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
+using System.Collections.Specialized;
+using System.Linq.Expressions;
 
 namespace OutlookFileDrag
 {
@@ -14,27 +16,38 @@ namespace OutlookFileDrag
         private static ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private NativeMethods.IDropTarget _delegate;
+        private StringCollection _allowedUrls;
 
         public DropTargetAdapter(NativeMethods.IDropTarget dropTarget)
         {
             _delegate = dropTarget;
+            _allowedUrls = Properties.Settings.Default.dropUrlAccept;
+        }
+
+        public Boolean validateUrl(string url)
+        {
+            foreach(string allowedUrl in _allowedUrls)
+            {
+                if (url.StartsWith(allowedUrl)) return true;
+            }
+            return false;
         }
 
         public int OleDragEnter([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj, [In, MarshalAs(UnmanagedType.U4)] int grfKeyState, [In, MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect)
         {
-            log.Info("OleDragEnter");
+            log.Debug("OleDragEnter");
             return _delegate.OleDragEnter(Wrap(pDataObj), grfKeyState, pt, ref pdwEffect);
         }
 
         public int OleDragOver([In, MarshalAs(UnmanagedType.U4)] int grfKeyState, [In, MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect)
         {
-            log.Info("OleDragOver");
+            log.Debug("OleDragOver");
             return _delegate.OleDragOver(grfKeyState, pt, ref pdwEffect);
         }
 
         public int OleDragLeave()
         {
-            log.Info("OleLeave");
+            log.Debug("OleLeave");
             return _delegate.OleDragLeave();
         }
 
@@ -101,16 +114,13 @@ namespace OutlookFileDrag
                 url = DataObjectHelper.GetContentUnicode(pDataObj, "UnicodeText");
             }
 
-            if (url is null)
+            if (url is null || !validateUrl(url))
             {
                 // If no URL has been located just do whatever the original request was
                 return pDataObj;
             }
             else
             {
-                // TODO Check the URL is a case records document
-                // TODO Perhaps we want a set of allowed URLs.
-
                 return new OutlookDataObjectBase(pDataObj, new string[] { url });
             }
         }

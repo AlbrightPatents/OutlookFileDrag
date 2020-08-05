@@ -7,6 +7,7 @@ using log4net;
 
 namespace OutlookFileDrag
 {
+    // TODO Rename OutlookDataObjectDrop
     // Class that wraps a drop data object converts URLs to file contents
     class OutlookDataObjectBase : NativeMethods.IDataObject, ICustomQueryInterface  
     {
