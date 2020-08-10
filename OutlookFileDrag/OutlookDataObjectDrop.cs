@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using log4net;
 
 namespace OutlookFileDrag
 {
-    // TODO Rename OutlookDataObjectDrop
     // Class that wraps a drop data object converts URLs to file contents
-    class OutlookDataObjectBase : NativeMethods.IDataObject, ICustomQueryInterface  
+    class OutlookDataObjectDrop : NativeMethods.IDataObject, ICustomQueryInterface  
     {
         // TODO - Do we need this here any more?
         private NativeMethods.IDataObject innerData;
@@ -19,9 +17,9 @@ namespace OutlookFileDrag
 
         public bool FilesDropped { get; private set; }
 
-        public OutlookDataObjectBase(NativeMethods.IDataObject innerData, string[] urls)
+        public OutlookDataObjectDrop(NativeMethods.IDataObject innerData, string[] urls)
         {
-            log.InfoFormat("OutlookDataObjectBase {0}", urls);
+            log.DebugFormat("OutlookDataObjectDrop {0}", urls);
             this.innerData = innerData;
             this.urls = urls;
         }
@@ -35,9 +33,9 @@ namespace OutlookFileDrag
         public static string UriToFilePath(Uri uri)
         {
             string query = uri.Query;
-            log.InfoFormat("query of {0} is {1}", uri, query);
+            log.DebugFormat("query of {0} is {1}", uri, query);
             string path = uri.LocalPath;
-            log.InfoFormat("Read path from URI {0}", path);
+            log.DebugFormat("Read path from URI {0}", path);
             return path.Substring(0, path.Length - query.Length); ;
         }
 
@@ -45,7 +43,7 @@ namespace OutlookFileDrag
         {
             string[] segments = uri.Segments;
             string lastSegment = segments[segments.Length - 1];
-            log.InfoFormat("Last segment of {0} is {1}", uri, lastSegment);
+            log.DebugFormat("Last segment of {0} is {1}", uri, lastSegment);
             return lastSegment;
         }
 
@@ -198,9 +196,9 @@ namespace OutlookFileDrag
             try
             {
                 // Get data into passed medium
-                log.InfoFormat("IDataObject.GetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
+                log.DebugFormat("IDataObject.GetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
                 string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name;
-                log.InfoFormat("IDataObject.GetData Format name: {0}", formatName);
+                log.DebugFormat("IDataObject.GetData Format name: {0}", formatName);
 
                 if (formatName == "FileGroupDescriptorW")
                 {
@@ -254,9 +252,9 @@ namespace OutlookFileDrag
         {
             try
             {
-                log.InfoFormat("IDataObject.QueryGetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
+                log.DebugFormat("IDataObject.QueryGetData called -- cfFormat {0} dwAspect {1} lindex {2} ptd {3} tymed {4}", format.cfFormat, format.dwAspect, format.lindex, format.ptd, format.tymed);
                 string formatName = System.Windows.Forms.DataFormats.GetFormat((ushort)format.cfFormat).Name;
-                log.InfoFormat("IDataObject.QueryGetData Format name: {0}", formatName);
+                log.DebugFormat("IDataObject.QueryGetData Format name: {0}", formatName);
 
                 int r;
                 switch(formatName)
@@ -271,7 +269,7 @@ namespace OutlookFileDrag
                       break;
                 }
 
-                log.InfoFormat("IDataObject.QueryGetData response {0}", r);
+                log.DebugFormat("IDataObject.QueryGetData response {0}", r);
                 return r;
             }
             catch (Exception ex)

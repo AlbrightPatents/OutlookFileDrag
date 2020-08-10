@@ -1,13 +1,8 @@
 ﻿using log4net;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using System.Collections.Specialized;
-using System.Linq.Expressions;
 
 namespace OutlookFileDrag
 {
@@ -53,7 +48,7 @@ namespace OutlookFileDrag
 
         public int OleDrop([In, MarshalAs(UnmanagedType.Interface)] NativeMethods.IDataObject pDataObj, [In, MarshalAs(UnmanagedType.U4)] int grfKeyState, [In, MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect)
         {
-            log.Info("OleDrop");
+            log.Debug("OleDrop");
             return _delegate.OleDrop(Wrap(pDataObj), grfKeyState, pt, ref pdwEffect);
         }
 
@@ -99,14 +94,14 @@ namespace OutlookFileDrag
 
             if (url is null)
             {
-                log.Info("No UniformResourceLocatorW found");
+                log.Debug("No UniformResourceLocatorW found");
                 // Check for ANSI URL
                 url = DataObjectHelper.GetContentUnicode(pDataObj, "UniformResourceLocator");
             }
 
             if (url is null)
             {
-                log.Info("No UniformResourceLocator found");
+                log.Debug("No UniformResourceLocator found");
             }
              
             if (!(url is null) && url.StartsWith("about:"))
@@ -121,7 +116,7 @@ namespace OutlookFileDrag
             }
             else
             {
-                return new OutlookDataObjectBase(pDataObj, new string[] { url });
+                return new OutlookDataObjectDrop(pDataObj, new string[] { url });
             }
         }
     }

@@ -197,7 +197,7 @@
   -->
   <ItemGroup>
     <Compile Include="DropTargetAdapter.cs" />
-    <Compile Include="OutlookDataObjectBase.cs" />
+    <Compile Include="OutlookDataObjectDrop.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
