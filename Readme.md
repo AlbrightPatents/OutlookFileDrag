@@ -6,7 +6,10 @@
 
 Microsoft Edge (as of Windows 10 1709) and Google Chrome (as of version 76) 
 natively support drag and drop from Outlook on Windows.  If you use one of these 
-browsers, then this plugin is not necessary.
+browsers, then this plugin may not be necessary. It should be noted however that
+by default dragging an entire email from Outlook to a browser is a 'move' operation
+and will remove the email from your inbox; This plugin modifies the operation to
+be a 'copy' leaving the original email unmodified.
 
 ## Overview
 
@@ -14,6 +17,10 @@ Outlook File Drag is an add-in for Outlook 2013 and 2016 that allows you to drag
 and drop Outlook items (messages, attachments, contacts, tasks, appointments, 
 meetings, etc) to applications that allow physical files to be dropped, such as
 web browsers.
+
+There is limited support for dragging from the browser to Outlook. Currently 
+'file:' URLs will be converted to their content if they match one of the sites
+on the approval list. 
 
 ## How Does it Work?
 
@@ -36,16 +43,18 @@ later in a cleanup process.
 
 - Works with Chrome, Firefox, Internet Explorer, Edge, and other applications that accept files to be dropped
 - Allows drag and drop into HTML5-based web applications
+- Limited support for dragging files from HTML5-based web applications into Outlook emails
 - Drag e-mails, attachments, contacts, calendar items, and more
 - Drag multiple items at once
 - Supports Unicode characters
 
 ## Installation
+For the time being you will need to build the product yourself.
 
-To install, run the installer that matches your Windows build:
-
-- [Download for 64-bit Windows (Outlook 32-bit or 64-bit)](https://github.com/tonyfederer/OutlookFileDrag/releases/download/v1.0.11/OutlookFileDragSetup_x64.zip)
-- [Download for 32-bit Windows](https://github.com/tonyfederer/OutlookFileDrag/releases/download/v1.0.11/OutlookFileDragSetup.zip)
+#To install, run the installer that matches your Windows build:
+#
+#- [Download for 64-bit Windows (Outlook 32-bit or 64-bit)](https://github.com/tonyfederer/OutlookFileDrag/releases/download/v1.0.11/OutlookFileDragSetup_x64.zip)
+#- [Download for 32-bit Windows](https://github.com/tonyfederer/OutlookFileDrag/releases/download/v1.0.11/OutlookFileDragSetup.zip)
 
 After installing, restart Outlook for the add-in to take effect.
 
@@ -82,12 +91,21 @@ Example:
 
 `msiexec.exe /x {CF5F9043-967C-400D-B6D5-F41AF6AD83AE} /qn /log C:\Logs\OutlookFileDragUninstall.log`
 
+### Drop URL format
+`file:\[\<host>\<share>\]<path>\<file>[?filename=<drop_file_name>]`
+
+e.g.
+
+`file:\\blah.local\public\sub1\sub2\file1234.jpg?filename=cat.jpg`
+
 ## Acknowledgements
 
 Outlook File Drag uses these open source projects:
 
 - [Easyhook](https://easyhook.github.io/)
 - [log4net](http://logging.apache.org/log4net/)
+- [Mono.HttpUtility](https://www.nuget.org/packages/Mono.HttpUtility/)
+
 
 ## Feedback/Contribute
 
