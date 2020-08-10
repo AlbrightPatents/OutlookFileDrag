@@ -51,6 +51,13 @@ namespace OutlookFileDrag
             }
         }
 
+        protected override Microsoft.Office.Core.IRibbonExtensibility
+CreateRibbonExtensibilityObject()
+        {
+                return Globals.Factory.GetRibbonFactory().CreateRibbonManager(
+                    new Microsoft.Office.Tools.Ribbon.IRibbonExtension[] { new Ribbon1() });
+        }
+
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             log.Fatal("Appdomain exception", (Exception)e.ExceptionObject);
