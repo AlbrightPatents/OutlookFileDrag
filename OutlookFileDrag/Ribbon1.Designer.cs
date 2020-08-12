@@ -37,7 +37,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Ribbon1));
             this.OutlookFileDragTab = this.Factory.CreateRibbonTab();
             this.options = this.Factory.CreateRibbonGroup();
-            this.comboBox1 = this.Factory.CreateRibbonComboBox();
+            this.OpenSettingsButton = this.Factory.CreateRibbonButton();
             this.OutlookFileDragTab.SuspendLayout();
             this.options.SuspendLayout();
             this.SuspendLayout();
@@ -50,14 +50,15 @@
             // 
             // options
             // 
-            this.options.Items.Add(this.comboBox1);
+            this.options.Items.Add(this.OpenSettingsButton);
             resources.ApplyResources(this.options, "options");
             this.options.Name = "options";
             // 
-            // comboBox1
+            // OpenSettingsButton
             // 
-            resources.ApplyResources(this.comboBox1, "comboBox1");
-            this.comboBox1.Name = "comboBox1";
+            resources.ApplyResources(this.OpenSettingsButton, "OpenSettingsButton");
+            this.OpenSettingsButton.Name = "OpenSettingsButton";
+            this.OpenSettingsButton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.OpenSettingsWindow);
             // 
             // Ribbon1
             // 
@@ -78,7 +79,7 @@
 
         private Microsoft.Office.Tools.Ribbon.RibbonTab OutlookFileDragTab;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup options;
-        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox comboBox1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton OpenSettingsButton;
     }
 
     partial class ThisRibbonCollection

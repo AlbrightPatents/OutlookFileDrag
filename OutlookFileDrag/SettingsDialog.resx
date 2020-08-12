@@ -117,70 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="OpenSettingsButton.Description" xml:space="preserve">
-    <value>Open the settings window</value>
-  </data>
-  <data name="OpenSettingsButton.Label" xml:space="preserve">
-    <value>Settings</value>
-  </data>
-  <data name="&gt;&gt;OpenSettingsButton.Name" xml:space="preserve">
-    <value>OpenSettingsButton</value>
-  </data>
-  <data name="&gt;&gt;OpenSettingsButton.Type" xml:space="preserve">
-    <value>Microsoft.VisualStudio.Tools.Office.Ribbon.View.ButtonView, Microsoft.VisualStudio.Tools.Office.Designer, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="&gt;&gt;OpenSettingsButton.Parent" xml:space="preserve">
-    <value>options</value>
-  </data>
-  <data name="&gt;&gt;OpenSettingsButton.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="options.Label" xml:space="preserve">
-    <value>Options</value>
-  </data>
-  <data name="&gt;&gt;options.Name" xml:space="preserve">
-    <value>options</value>
-  </data>
-  <data name="&gt;&gt;options.Type" xml:space="preserve">
-    <value>Microsoft.VisualStudio.Tools.Office.Ribbon.View.GroupView, Microsoft.VisualStudio.Tools.Office.Designer, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="&gt;&gt;options.Parent" xml:space="preserve">
-    <value>OutlookFileDragTab</value>
-  </data>
-  <data name="&gt;&gt;options.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="OutlookFileDragTab.Label" xml:space="preserve">
-    <value>Outlook File Drag</value>
-  </data>
-  <data name="&gt;&gt;OutlookFileDragTab.Name" xml:space="preserve">
-    <value>OutlookFileDragTab</value>
-  </data>
-  <data name="&gt;&gt;OutlookFileDragTab.Type" xml:space="preserve">
-    <value>Microsoft.VisualStudio.Tools.Office.Ribbon.View.TabView, Microsoft.VisualStudio.Tools.Office.Designer, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="URL.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="&gt;&gt;Ribbon1.OfficeMenu.Name" xml:space="preserve">
-    <value>Ribbon1.OfficeMenu</value>
-  </data>
-  <data name="&gt;&gt;Ribbon1.OfficeMenu.Type" xml:space="preserve">
-    <value>Microsoft.VisualStudio.Tools.Office.Ribbon.View.OfficeMenuView, Microsoft.VisualStudio.Tools.Office.Designer, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="&gt;&gt;Ribbon1.OfficeMenu.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;Ribbon1.OfficeMenu.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="$this.Tag" xml:space="preserve">
-    <value />
-  </data>
-  <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>Ribbon1</value>
-  </data>
-  <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Microsoft.VisualStudio.Tools.Office.Ribbon.View.GenericRibbonView, Microsoft.VisualStudio.Tools.Office.Designer, Version=16.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>
