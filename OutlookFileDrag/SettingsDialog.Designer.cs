@@ -35,6 +35,7 @@ namespace OutlookFileDrag
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.SaveSettingsButton = new System.Windows.Forms.Button();
             this.URL = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.deleteButtonColumn = new System.Windows.Forms.DataGridViewButtonColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -45,13 +46,15 @@ namespace OutlookFileDrag
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.URL});
+            this.URL,
+            this.deleteButtonColumn});
             this.dataGridView1.Location = new System.Drawing.Point(27, 36);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 82;
             this.dataGridView1.RowTemplate.Height = 33;
             this.dataGridView1.Size = new System.Drawing.Size(749, 152);
             this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.CellClick);
             // 
             // SaveSettingsButton
             // 
@@ -71,6 +74,15 @@ namespace OutlookFileDrag
             this.URL.HeaderText = "Accept drop URLs";
             this.URL.MinimumWidth = 10;
             this.URL.Name = "URL";
+            // 
+            // deleteButtonColumn
+            // 
+            this.deleteButtonColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.deleteButtonColumn.HeaderText = "Delete";
+            this.deleteButtonColumn.MinimumWidth = 10;
+            this.deleteButtonColumn.Name = "deleteButtonColumn";
+            this.deleteButtonColumn.Text = "Delete";
+            this.deleteButtonColumn.Width = 80;
             // 
             // SettingsDialog
             // 
@@ -92,5 +104,6 @@ namespace OutlookFileDrag
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Button SaveSettingsButton;
         private System.Windows.Forms.DataGridViewTextBoxColumn URL;
+        private System.Windows.Forms.DataGridViewButtonColumn deleteButtonColumn;
     }
 }

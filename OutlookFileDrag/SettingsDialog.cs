@@ -28,7 +28,6 @@ namespace OutlookFileDrag
                 lst.Add(new TextString(url));
             }
             BindingSource bs = new BindingSource();
-            
             // bind to the new wrapper class
             bs.DataSource = lst;
             this.dataGridView1.DataSource = bs;
@@ -47,11 +46,25 @@ namespace OutlookFileDrag
             }
             Settings.Default.dropUrlAccept = urlStrings;
             Settings.Default.Save();
+            this.Dispose();
         }
 
         private void dataGridView1_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             dataGridView1.BeginEdit(true);
+        }
+
+        private void CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //if click is on new row or header row
+            if (e.RowIndex == dataGridView1.NewRowIndex || e.RowIndex < 0)
+                return;
+
+            //Check if click is on specific column 
+            if (e.ColumnIndex == dataGridView1.Columns["deleteButtonColumn"].Index)
+            {
+                ((BindingSource)this.dataGridView1.DataSource).RemoveAt(e.RowIndex);
+            }
         }
     }
 }
