@@ -78,11 +78,12 @@ namespace OutlookFileDrag
             // deleteButtonColumn
             // 
             this.deleteButtonColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.deleteButtonColumn.HeaderText = "Delete";
+            this.deleteButtonColumn.HeaderText = "";
             this.deleteButtonColumn.MinimumWidth = 10;
             this.deleteButtonColumn.Name = "deleteButtonColumn";
-            this.deleteButtonColumn.Text = "Delete";
-            this.deleteButtonColumn.Width = 80;
+            this.deleteButtonColumn.Text = "Remove";
+            this.deleteButtonColumn.UseColumnTextForButtonValue = true;
+            this.deleteButtonColumn.Width = 33;
             // 
             // SettingsDialog
             // 
