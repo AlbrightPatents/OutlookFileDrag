@@ -31,7 +31,6 @@ namespace OutlookFileDrag
             // bind to the new wrapper class
             bs.DataSource = lst;
             this.dataGridView1.DataSource = bs;
-            this.dataGridView1.AllowUserToDeleteRows = true;
         }
 
         private void SaveClicked(object sender, EventArgs e)
@@ -65,6 +64,11 @@ namespace OutlookFileDrag
             {
                 ((BindingSource)this.dataGridView1.DataSource).RemoveAt(e.RowIndex);
             }
+        }
+
+        private void cancelClicked(object sender, EventArgs e)
+        {
+            this.Dispose();
         }
     }
 }

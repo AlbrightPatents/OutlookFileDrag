@@ -33,9 +33,10 @@ namespace OutlookFileDrag
         private void InitializeComponent()
         {
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.SaveSettingsButton = new System.Windows.Forms.Button();
             this.URL = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.deleteButtonColumn = new System.Windows.Forms.DataGridViewButtonColumn();
+            this.SaveSettingsButton = new System.Windows.Forms.Button();
+            this.cancelButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -48,24 +49,14 @@ namespace OutlookFileDrag
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.URL,
             this.deleteButtonColumn});
-            this.dataGridView1.Location = new System.Drawing.Point(27, 36);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 12);
             this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.RowHeadersWidth = 82;
             this.dataGridView1.RowTemplate.Height = 33;
-            this.dataGridView1.Size = new System.Drawing.Size(749, 152);
+            this.dataGridView1.Size = new System.Drawing.Size(776, 267);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.CellClick);
-            // 
-            // SaveSettingsButton
-            // 
-            this.SaveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveSettingsButton.Location = new System.Drawing.Point(689, 395);
-            this.SaveSettingsButton.Name = "SaveSettingsButton";
-            this.SaveSettingsButton.Size = new System.Drawing.Size(87, 43);
-            this.SaveSettingsButton.TabIndex = 1;
-            this.SaveSettingsButton.Text = "Save";
-            this.SaveSettingsButton.UseVisualStyleBackColor = true;
-            this.SaveSettingsButton.Click += new System.EventHandler(this.SaveClicked);
             // 
             // URL
             // 
@@ -85,11 +76,34 @@ namespace OutlookFileDrag
             this.deleteButtonColumn.UseColumnTextForButtonValue = true;
             this.deleteButtonColumn.Width = 33;
             // 
+            // SaveSettingsButton
+            // 
+            this.SaveSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.SaveSettingsButton.Location = new System.Drawing.Point(701, 305);
+            this.SaveSettingsButton.Name = "SaveSettingsButton";
+            this.SaveSettingsButton.Size = new System.Drawing.Size(87, 43);
+            this.SaveSettingsButton.TabIndex = 1;
+            this.SaveSettingsButton.Text = "Save";
+            this.SaveSettingsButton.UseVisualStyleBackColor = true;
+            this.SaveSettingsButton.Click += new System.EventHandler(this.SaveClicked);
+            // 
+            // cancelButton
+            // 
+            this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cancelButton.Location = new System.Drawing.Point(12, 305);
+            this.cancelButton.Name = "cancelButton";
+            this.cancelButton.Size = new System.Drawing.Size(104, 42);
+            this.cancelButton.TabIndex = 2;
+            this.cancelButton.Text = "Cancel";
+            this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelClicked);
+            // 
             // SettingsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 361);
+            this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.SaveSettingsButton);
             this.Controls.Add(this.dataGridView1);
             this.Name = "SettingsDialog";
@@ -106,5 +120,6 @@ namespace OutlookFileDrag
         private System.Windows.Forms.Button SaveSettingsButton;
         private System.Windows.Forms.DataGridViewTextBoxColumn URL;
         private System.Windows.Forms.DataGridViewButtonColumn deleteButtonColumn;
+        private System.Windows.Forms.Button cancelButton;
     }
 }
