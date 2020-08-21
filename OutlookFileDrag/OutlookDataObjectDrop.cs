@@ -59,6 +59,11 @@ namespace OutlookFileDrag
             return x.Get("filename");
         }
 
+        public Boolean IsFileUrl(string url)
+        {
+            return url.ToLower().StartsWith("file:");
+        }
+
         public static string UrlToFileName(string url)
         {
             // TODO Improve the way the query params are separated from the URL
@@ -193,6 +198,7 @@ namespace OutlookFileDrag
 
         public int GetData(ref FORMATETC format, out STGMEDIUM medium)
         {
+            medium = new STGMEDIUM();
             try
             {
                 // Get data into passed medium
@@ -202,24 +208,30 @@ namespace OutlookFileDrag
 
                 if (formatName == "FileGroupDescriptorW")
                 {
-                    medium = new STGMEDIUM();
                     DataObjectHelper.SetFileGroupDescriptorW(ref medium, UrlsToFilenames(urls));
                     return NativeMethods.S_OK;
                 }
                 else if (formatName == "FileGroupDescriptor")
                 {
-                    medium = new STGMEDIUM();
                     DataObjectHelper.SetFileGroupDescriptor(ref medium, UrlsToFilenames(urls));
                     return NativeMethods.S_OK;
                 }
                 else if (formatName == "FileContents")
                 {
-                    medium = new STGMEDIUM();
                     int index = format.lindex;
                     if (index >=0 && index < urls.Length) {
-                        // TODO Currently this only works with locally accessible file: URLs
-                        // TODO Add support for HTTP/HTTPS fetches
-                        DataObjectHelper.SetFileContents(ref medium, UrlToFilePath(urls[index]));
+                        string url = urls[index];
+                        if (IsFileUrl(url))
+                        {
+                            // Process locally accessible file: URLs
+                            DataObjectHelper.SetFileContents(ref medium, UrlToFilePath(urls[index]));
+                        }
+                        else
+                        {
+                            // TODO Add support for HTTP/HTTPS fetches
+
+                            return NativeMethods.DV_E_FORMATETC;
+                        }
                     }
                     else
                     {
@@ -229,15 +241,12 @@ namespace OutlookFileDrag
                 }
                 else
                 {
-                    medium = new STGMEDIUM();
                     return NativeMethods.DV_E_FORMATETC;
                 }
-
             }
             catch (Exception ex)
             {
                 log.Error("Exception in IDataObject.GetData", ex);
-                medium = new STGMEDIUM();
                 return NativeMethods.E_UNEXPECTED;
             }
         }
