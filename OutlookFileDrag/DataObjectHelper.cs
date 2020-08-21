@@ -101,7 +101,7 @@ namespace OutlookFileDrag
         {
             IStream iStream = null;
             log.InfoFormat("Creating stream on file {0}", filename);
-            int result = NativeMethods.SHCreateStreamOnFileEx(filename, 0, 0, false, null, ref iStream);
+            var result = NativeMethods.SHCreateStreamOnFile(filename, 0, out iStream);
             log.InfoFormat("Stream created with result {0}", result);
             log.InfoFormat("Stream still null? {0}", iStream == null);
             IntPtr ptr = Marshal.GetIUnknownForObject(iStream);

@@ -252,7 +252,8 @@ MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect);
         [return: MarshalAs(UnmanagedType.I4)]
         public delegate int RegisterDragDropDelegate(IntPtr hwnd, IDropTarget pDropTarget);
 
-        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false, EntryPoint = "SHCreateStreamOnFileEx")]
-        public static extern int SHCreateStreamOnFileEx(string fileName, uint grfmode, uint dwAttributes, bool fCreate, System.Runtime.InteropServices.ComTypes.IStream streamNull, ref System.Runtime.InteropServices.ComTypes.IStream stream);
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.I4)]
+        public static extern int SHCreateStreamOnFile(string pszFile, uint grfMode, out IStream ppstm);
     }
 }
