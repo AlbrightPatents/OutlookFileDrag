@@ -91,12 +91,22 @@ Example:
 
 `msiexec.exe /x {CF5F9043-967C-400D-B6D5-F41AF6AD83AE} /qn /log C:\Logs\OutlookFileDragUninstall.log`
 
+## Drag URL content into an email
+There is limited support for dragging the contents of a URL into an email, currently only supported
+for the *file:* protocol. The behaviour is enabled site-by-site by adding *accept* URLs to the
+settings found at: *Outlook ribbon -> Outlook File Drag -> Settings*. UNC paths are accepted, so if 
+for example you want to allow content from the share *public* on the server *server1* add the following:
+`file:\\server1\public\`
+
 ### Drop URL format
+The URL presented for drop should contain the location of the file contents and optionally the name to 
+call the file within the email:
+
 `file:\[\<host>\<share>\]<path>\<file>[?filename=<drop_file_name>]`
 
 e.g.
 
-`file:\\blah.local\public\sub1\sub2\file1234.jpg?filename=cat.jpg`
+`file:\\server1\public\sub1\sub2\file1234.jpg?filename=cat.jpg`
 
 ## Acknowledgements
 
