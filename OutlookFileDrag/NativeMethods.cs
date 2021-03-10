@@ -4,6 +4,8 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace OutlookFileDrag
 {
+
+
     static class NativeMethods
     {
         public const int S_OK = 0;
@@ -12,6 +14,7 @@ namespace OutlookFileDrag
         public const short CF_TEXT = 1;
         public const short CF_UNICODETEXT = 13;
         public const short CF_HDROP = 15;
+        public const short CF_LINK = -15683;                 // Link
 
         public const int DATA_S_SAMEFORMATETC = 0x00040130;
 
@@ -202,7 +205,55 @@ namespace OutlookFileDrag
     
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.I4)]
-        public delegate int DragDropDelegate(NativeMethods.IDataObject pDataObj, IntPtr pDropSource, uint dwOKEffects, out uint pdwEffect);
+        public delegate int DragDropDelegate(IDataObject pDataObj, IntPtr pDropSource, uint dwOKEffects, out uint pdwEffect);
 
+
+        [ComImport, Guid("00000122-0000-0000-C000-000000000046"),
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IDropTarget
+        {
+            [PreserveSig]
+            int OleDragEnter([In, MarshalAs(UnmanagedType.Interface)] IDataObject
+            pDataObj, [In, MarshalAs(UnmanagedType.U4)] int grfKeyState, [In,
+MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect);
+            [PreserveSig]
+            int OleDragOver([In, MarshalAs(UnmanagedType.U4)] int
+            grfKeyState, [In, MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref
+int pdwEffect);
+            [PreserveSig]
+            int OleDragLeave();
+            [PreserveSig]
+            int OleDrop([In, MarshalAs(UnmanagedType.Interface)] IDataObject
+            pDataObj, [In, MarshalAs(UnmanagedType.U4)] int grfKeyState, [In,
+MarshalAs(UnmanagedType.U8)] long pt, [In, Out] ref int pdwEffect);
+        }
+
+        [ComImport, Guid("00000122-0000-0000-C000-000000000046"), InterfaceType(1)]
+        public interface IDropTargetX
+        {
+            [PreserveSig]
+            [return: MarshalAs(UnmanagedType.I4)]
+            int DragEnter(IDataObject pDataObj, uint grfKeyState, POINTL pt, out uint pdwEffect);
+            [PreserveSig]
+            [return: MarshalAs(UnmanagedType.I4)]
+            int DragLeave();
+            [PreserveSig]
+            [return: MarshalAs(UnmanagedType.I4)]
+            int DragOver(uint grfKeyState, POINTL pt, out uint pdwEffect);
+            [PreserveSig]
+            [return: MarshalAs(UnmanagedType.I4)]
+            int Drop(IDataObject pDataObj, uint grfKeyState, POINTL pt, out uint pdwEffect);
+        }
+
+        [DllImport("ole32.dll")]
+        public static extern int RegisterDragDrop(IntPtr hwnd, IDropTarget pDropTarget);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.I4)]
+        public delegate int RegisterDragDropDelegate(IntPtr hwnd, IDropTarget pDropTarget);
+
+        [DllImport("shlwapi.dll", CharSet = CharSet.Unicode, PreserveSig = true)]
+        [return: MarshalAs(UnmanagedType.I4)]
+        public static extern int SHCreateStreamOnFile(string pszFile, uint grfMode, out IStream ppstm);
     }
 }
